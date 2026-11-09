@@ -42,8 +42,8 @@ services:
       - "127.0.0.1:4000:4000"
     # Run migrations + seed on startup, then start server
     command: >
-      sh -c "npx knex migrate:latest --knexfile src/db/knexfile.ts
-      && npx knex seed:run --knexfile src/db/knexfile.ts
+      sh -c "npx knex migrate:latest --knexfile dist/db/knexfile.js
+      && npx knex seed:run --knexfile dist/db/knexfile.js
       && node dist/index.js"
 
   client:

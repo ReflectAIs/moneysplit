@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { body, validationResult } from 'express-validator';
 import db from '../db/connection';
 import { requireAuth, signToken, AuthRequest } from '../middleware/auth';
+import { sendPasswordResetEmail, emailEnabled } from '../services/email';
 
 const router = Router();
 
@@ -100,10 +101,13 @@ router.post(
     const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
     await db('password_resets').insert({ user_id: user.id, token, expires_at: expiresAt });
 
+    // Send the reset email. If SMTP is not configured, the link is logged instead.
+    await sendPasswordResetEmail(user.email, user.name, token);
+
     res.json({
       message: 'If that email exists, a reset link has been sent.',
-      // Dev convenience: return the token so the reset flow can be completed without an email service.
-      resetToken: token
+      // Dev convenience: only expose the token when no email service is configured.
+      ...(emailEnabled ? {} : { resetToken: token })
     });
   }
 );

@@ -9,7 +9,7 @@ export function ForgotPassword() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [resetToken, setResetToken] = useState<string | null>(null);
+    const [sent, setSent] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -18,8 +18,7 @@ export function ForgotPassword() {
         try {
             const res = await api.forgotPassword(email);
             show(res.message);
-            // Dev convenience: expose the reset token so the flow can be completed without an email service.
-            if (res.resetToken) setResetToken(res.resetToken);
+            setSent(true);
         } catch (err) {
             setError((err as Error).message);
         } finally {
@@ -65,16 +64,12 @@ export function ForgotPassword() {
                         </button>
                     </form>
 
-                    {resetToken && (
+                    {sent && (
                         <div className="mt-4 rounded-xl bg-olive-50 px-4 py-3 text-sm text-olive-800 dark:bg-olive-900/30 dark:text-olive-200">
-                            <p className="mb-1 font-semibold">No email service is configured, so here is your reset token:</p>
-                            <p className="break-all font-mono text-xs">{resetToken}</p>
-                            <p className="mt-2">
-                                Use it on the{' '}
-                                <Link to={`/reset-password?token=${encodeURIComponent(resetToken)}`} className="font-semibold underline">
-                                    reset password
-                                </Link>{' '}
-                                page.
+                            <p className="font-semibold">Check your inbox.</p>
+                            <p className="mt-1">
+                                If an account exists for <span className="font-medium">{email}</span>, we've sent a link to reset your
+                                password. It expires in 1 hour.
                             </p>
                         </div>
                     )}

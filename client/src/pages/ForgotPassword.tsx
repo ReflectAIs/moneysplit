@@ -65,13 +65,13 @@ export function ForgotPassword() {
                     </form>
 
                     {sent && (
-                        <div className="mt-4 rounded-xl bg-olive-50 px-4 py-3 text-sm text-olive-800 dark:bg-olive-900/30 dark:text-olive-200">
-                            <p className="font-semibold">Check your inbox.</p>
-                            <p className="mt-1">
-                                If an account exists for <span className="font-medium">{email}</span>, we've sent a link to reset your
-                                password. It expires in 1 hour.
-                            </p>
-                        </div>
+                      <div className="mt-4 rounded-xl bg-olive-50 px-4 py-3 text-sm text-olive-800 dark:bg-olive-900/30 dark:text-olive-200">
+                        <p className="font-semibold">Check your inbox.</p>
+                        <p className="mt-1">
+                          If an account exists for <span className="font-medium">{email}</span>, we've sent a link to reset your
+                          password. It expires in 1 hour.
+                        </p>
+                      </div>
                     )}
 
                     <p className="mt-6 text-center text-sm text-ink-500 dark:text-ink-400">

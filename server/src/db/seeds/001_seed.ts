@@ -26,9 +26,9 @@ export async function seed(knex: Knex): Promise<void> {
     .returning('id');
 
   await knex('group_members').insert([
-    { group_id: group.id, user_id: alice.id },
-    { group_id: group.id, user_id: bob.id },
-    { group_id: group.id, user_id: carol.id }
+    { group_id: group.id, user_id: alice.id, role: 'admin' },
+    { group_id: group.id, user_id: bob.id, role: 'member' },
+    { group_id: group.id, user_id: carol.id, role: 'member' }
   ]);
 
   const [exp1] = await knex('expenses')

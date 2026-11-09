@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: moneysplit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PGUSER:-postgres}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-postgres}
+      POSTGRES_DB: ${PGDATABASE:-moneysplit}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-postgres} -d ${PGDATABASE:-moneysplit}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: moneysplit-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: ${PGUSER:-postgres}
+      PGPASSWORD: ${PGPASSWORD:-postgres}
+      PGDATABASE: ${PGDATABASE:-moneysplit}
+      JWT_SECRET: ${JWT_SECRET:-please-change-me-in-production}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost}
+    ports:
+      - "127.0.0.1:4000:4000"
+    # Run migrations + seed on startup, then start server
+    command: >
+      sh -c "npx knex migrate:latest --knexfile src/db/knexfile.ts
+      && npx knex seed:run --knexfile src/db/knexfile.ts
+      && node dist/index.js"
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: moneysplit-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "127.0.0.1:8080:80"
+
+volumes:
+  pgdata:

@@ -3,10 +3,13 @@ import { useAuth } from './hooks/useAuth';
 import { Layout } from './components/Layout';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { GroupDetail } from './pages/GroupDetail';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { InviteAccept } from './pages/InviteAccept';
+import { Profile } from './pages/Profile';
 
 function Protected({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
@@ -26,6 +29,8 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/invite/:token" element={<InviteAccept />} />
       <Route
         element={
@@ -37,6 +42,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/groups/:id" element={<GroupDetail />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

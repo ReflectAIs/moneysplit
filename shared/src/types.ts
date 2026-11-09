@@ -2,6 +2,11 @@ export type SplitType = 'equal' | 'custom' | 'percent';
 
 export type Role = 'user' | 'superadmin';
 
+export type GroupMemberRole = 'admin' | 'member';
+
+// How a newly joined member participates in the group's history.
+export type JoinHistoryOption = 'include' | 'new';
+
 export interface User {
   id: string;
   email: string;
@@ -26,6 +31,18 @@ export interface GroupMember {
   name: string;
   email: string;
   joinedAt: string;
+  role: GroupMemberRole;
+}
+
+export interface GroupDetail {
+  id: string;
+  name: string;
+  description: string | null;
+  createdBy: string;
+  createdAt: string;
+  members: GroupMember[];
+  // Role of the currently authenticated user within this group.
+  myRole: GroupMemberRole;
 }
 
 export interface ExpenseSplit {
@@ -85,6 +102,22 @@ export interface InviteLink {
 export interface AuthResponse {
   token: string;
   user: User;
+}
+
+export interface UpdateProfileInput {
+  name?: string;
+  email?: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  // In dev (no email service), the reset token is returned so it can be used directly.
+  resetToken?: string;
 }
 
 export interface ApiError {

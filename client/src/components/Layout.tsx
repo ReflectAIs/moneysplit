@@ -33,7 +33,9 @@ export function Layout() {
             )}
             {user && (
               <div className="flex items-center gap-2">
-                <Avatar name={user.name} />
+                <Link to="/profile" title="Profile" className="transition hover:opacity-80">
+                  <Avatar name={user.name} />
+                </Link>
                 <button onClick={handleLogout} className="btn-ghost hidden sm:inline-flex">
                   Logout
                 </button>

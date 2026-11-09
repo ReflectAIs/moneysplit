@@ -109,6 +109,100 @@ router.post('/:groupId', [
   }
 });
 
+// Delete an expense. Allowed for the payer or a group admin.
+router.delete('/:groupId/:expenseId', [
+  param('groupId').isUUID().withMessage('Invalid group id'),
+  param('expenseId').isUUID().withMessage('Invalid expense id')
+], async (req: AuthRequest, res: Response) => {
+  const invalid = validate(req, res);
+  if (invalid) return invalid;
+  const { groupId, expenseId } = req.params;
+
+  if (!(await isMember(groupId, req.user!.id))) {
+    return res.status(403).json({ error: 'Not a member' });
+  }
+
+  const expense = await db('expenses').where({ id: expenseId, group_id: groupId }).first();
+  if (!expense) return res.status(404).json({ error: 'Expense not found' });
+
+  const membership = await db('group_members')
+    .where({ group_id: groupId, user_id: req.user!.id })
+    .first();
+  const isAdmin = membership?.role === 'admin';
+  const isPayer = expense.paid_by === req.user!.id;
+
+  if (!isAdmin && !isPayer) {
+    return res.status(403).json({ error: 'Only the payer or a group admin can delete this expense' });
+  }
+
+  await db('expense_splits').where({ expense_id: expenseId }).del();
+  await db('expenses').where({ id: expenseId }).del();
+  res.json({ message: 'Expense deleted' });
+});
+
+// Update an expense. Allowed for the payer or a group admin.
+router.put('/:groupId/:expenseId', [
+  param('groupId').isUUID().withMessage('Invalid group id'),
+  param('expenseId').isUUID().withMessage('Invalid expense id'),
+  body('description').optional().trim().isLength({ min: 1, max: 120 }).withMessage('Description is required'),
+  body('amount').optional().isFloat({ min: 0.01, max: 100000000 }).withMessage('Valid amount is required'),
+  body('paidBy').optional().isUUID().withMessage('Invalid payer'),
+  body('splits').optional().isArray({ min: 1 }).withMessage('At least one split is required')
+], async (req: AuthRequest, res: Response) => {
+  const invalid = validate(req, res);
+  if (invalid) return invalid;
+  const { groupId, expenseId } = req.params;
+  const { description, amount, paidBy, category, date, splitType, splits } = req.body;
+
+  if (!(await isMember(groupId, req.user!.id))) {
+    return res.status(403).json({ error: 'Not a member' });
+  }
+
+  const expense = await db('expenses').where({ id: expenseId, group_id: groupId }).first();
+  if (!expense) return res.status(404).json({ error: 'Expense not found' });
+
+  const membership = await db('group_members')
+    .where({ group_id: groupId, user_id: req.user!.id })
+    .first();
+  const isAdmin = membership?.role === 'admin';
+  const isPayer = expense.paid_by === req.user!.id;
+  if (!isAdmin && !isPayer) {
+    return res.status(403).json({ error: 'Only the payer or a group admin can edit this expense' });
+  }
+
+  const trx = await db.transaction();
+  try {
+    const updates: Record<string, unknown> = {};
+    if (description !== undefined) updates.description = description;
+    if (amount !== undefined) updates.amount = Number(amount);
+    if (paidBy !== undefined) updates.paid_by = paidBy;
+    if (category !== undefined) updates.category = category;
+    if (date !== undefined) updates.date = date;
+
+    if (Object.keys(updates).length > 0) {
+      await trx('expenses').where({ id: expenseId }).update(updates);
+    }
+
+    // If splits are provided, replace them entirely.
+    if (splits && Array.isArray(splits) && splits.length > 0) {
+      await trx('expense_splits').where({ expense_id: expenseId }).del();
+      const splitRows = splits.map((s: { userId: string; share: number }) => ({
+        expense_id: expenseId,
+        user_id: s.userId,
+        share_amount: Number(s.share),
+        share_type: splitType || 'equal'
+      }));
+      await trx('expense_splits').insert(splitRows);
+    }
+
+    await trx.commit();
+    res.json({ message: 'Expense updated' });
+  } catch (e) {
+    await trx.rollback();
+    throw e;
+  }
+});
+
 // Settle up: from_user pays to_user
 router.post('/:groupId/settle', [
   param('groupId').isUUID().withMessage('Invalid group id'),

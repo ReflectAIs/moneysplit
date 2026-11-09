@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function Login() {
   const { login } = useAuth();
@@ -59,14 +60,21 @@ export function Login() {
               />
             </div>
             <div>
-              <label className="label">Password</label>
-              <input
-                type="password"
-                className="input"
+              <div className="flex items-center justify-between">
+                <label className="label">Password</label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-olive-600 hover:underline dark:text-olive-400"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={setPassword}
                 placeholder="••••••••"
                 required
+                autoComplete="current-password"
               />
             </div>
             <button type="submit" className="btn-primary w-full" disabled={loading}>

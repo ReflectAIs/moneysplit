@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function Signup() {
   const { register } = useAuth();
@@ -11,12 +12,21 @@ export function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Passwords do not match');
+      return;
+    }
     setLoading(true);
     try {
       await register(name, email, password);
@@ -72,14 +82,24 @@ export function Signup() {
             </div>
             <div>
               <label className="label">Password</label>
-              <input
-                type="password"
-                className="input"
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 6 characters"
-                minLength={6}
+                onChange={setPassword}
+                placeholder="At least 8 characters"
+                minLength={8}
                 required
+                autoComplete="new-password"
+              />
+            </div>
+            <div>
+              <label className="label">Confirm password</label>
+              <PasswordInput
+                value={confirm}
+                onChange={setConfirm}
+                placeholder="Re-enter password"
+                minLength={8}
+                required
+                autoComplete="new-password"
               />
             </div>
             <button type="submit" className="btn-primary w-full" disabled={loading}>

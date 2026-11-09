@@ -7,7 +7,11 @@ import type {
   Debt,
   Settlement,
   InviteLink,
-  SplitType
+  SplitType,
+  UpdateProfileInput,
+  ChangePasswordInput,
+  ForgotPasswordResponse,
+  GroupMemberRole
 } from '@moneysplit/shared';
 
 const TOKEN_KEY = 'moneysplit_token';
@@ -51,21 +55,75 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ email, password })
     }),
+  forgotPassword: (email: string) =>
+    request<ForgotPasswordResponse>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    }),
+  resetPassword: (token: string, password: string) =>
+    request<{ message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password })
+    }),
+  updateProfile: (data: UpdateProfileInput) =>
+    request<AuthResponse>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+  changePassword: (data: ChangePasswordInput) =>
+    request<{ message: string }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
 
   // Groups
   listGroups: () => request<Group[]>('/groups'),
   createGroup: (name: string, description?: string) =>
     request<Group>('/groups', { method: 'POST', body: JSON.stringify({ name, description }) }),
   getGroup: (id: string) =>
-    request<{ id: string; name: string; description: string | null; members: GroupMember[] }>(
+    request<{ id: string; name: string; description: string | null; members: GroupMember[]; myRole: GroupMemberRole }>(
       `/groups/${id}`
     ),
   createInvite: (groupId: string) =>
     request<InviteLink>(`/groups/${groupId}/invite`, { method: 'POST' }),
-  joinGroup: (inviteToken: string) =>
+  joinGroup: (inviteToken: string, history: 'include' | 'new' = 'new') =>
     request<{ id: string; name: string }>('/groups/join', {
       method: 'POST',
-      body: JSON.stringify({ inviteToken })
+      body: JSON.stringify({ inviteToken, history })
+    }),
+  removeMember: (groupId: string, userId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/members/${userId}`, {
+      method: 'DELETE'
+    }),
+  promoteMember: (groupId: string, userId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/members/${userId}/promote`, {
+      method: 'POST'
+    }),
+  demoteMember: (groupId: string, userId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/members/${userId}/demote`, {
+      method: 'POST'
+    }),
+  deleteExpense: (groupId: string, expenseId: string) =>
+    request<{ message: string }>(`/expenses/${groupId}/${expenseId}`, {
+      method: 'DELETE'
+    }),
+  updateExpense: (
+    groupId: string,
+    expenseId: string,
+    data: { description?: string; amount?: number; paidBy?: string; category?: string; date?: string; splitType?: string; splits?: { userId: string; share: number }[] }
+  ) =>
+    request<{ message: string }>(`/expenses/${groupId}/${expenseId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+  updateGroup: (groupId: string, data: { name?: string; description?: string }) =>
+    request<Group>(`/groups/${groupId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+  deleteGroup: (groupId: string) =>
+    request<{ message: string }>(`/groups/${groupId}`, {
+      method: 'DELETE'
     }),
   getBalances: (groupId: string) =>
     request<{ balances: Balance[]; debts: Debt[] }>(`/groups/${groupId}/balances`),

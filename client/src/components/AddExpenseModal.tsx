@@ -1,5 +1,5 @@
-import { useState, FormEvent } from 'react';
-import type { GroupMember, SplitType } from '@moneysplit/shared';
+import { useState, FormEvent, useEffect } from 'react';
+import type { GroupMember, SplitType, Expense } from '@moneysplit/shared';
 import { Modal } from './Modal';
 import { api } from '../lib/api';
 import { useToast } from './Toast';
@@ -13,7 +13,8 @@ export function AddExpenseModal({
   groupId,
   members,
   currentUserId,
-  onAdded
+  onAdded,
+  editing
 }: {
   open: boolean;
   onClose: () => void;
@@ -21,6 +22,7 @@ export function AddExpenseModal({
   members: GroupMember[];
   currentUserId: string;
   onAdded: () => void;
+  editing?: Expense | null;
 }) {
   const { show } = useToast();
   const [description, setDescription] = useState('');
@@ -34,6 +36,38 @@ export function AddExpenseModal({
   const [loading, setLoading] = useState(false);
 
   const total = parseFloat(amount) || 0;
+
+  // Populate the form when editing an existing expense.
+  useEffect(() => {
+    if (open && editing) {
+      setDescription(editing.description);
+      setAmount(String(editing.amount));
+      setPaidBy(editing.paidBy);
+      setCategory(editing.category);
+      setDate(editing.date ? String(editing.date).slice(0, 10) : new Date().toISOString().slice(0, 10));
+      const st = editing.splits[0]?.shareType || 'equal';
+      setSplitType(st);
+      const custom: Record<string, string> = {};
+      const percent: Record<string, string> = {};
+      for (const s of editing.splits) {
+        if (st === 'custom') custom[s.userId] = String(s.shareAmount);
+        else if (st === 'percent') {
+          percent[s.userId] = editing.amount > 0 ? String(Math.round((s.shareAmount / editing.amount) * 10000) / 100) : '0';
+        }
+      }
+      setCustomSplits(custom);
+      setPercentSplits(percent);
+    } else if (open) {
+      setDescription('');
+      setAmount('');
+      setPaidBy(currentUserId);
+      setCategory('Food');
+      setDate(new Date().toISOString().slice(0, 10));
+      setSplitType('equal');
+      setCustomSplits({});
+      setPercentSplits({});
+    }
+  }, [open, editing, currentUserId]);
 
   const buildSplits = (): { userId: string; share: number }[] => {
     if (splitType === 'equal') {
@@ -58,7 +92,7 @@ export function AddExpenseModal({
     }
     setLoading(true);
     try {
-      await api.createExpense(groupId, {
+      const payload = {
         description: description.trim(),
         amount: total,
         paidBy,
@@ -66,8 +100,14 @@ export function AddExpenseModal({
         date,
         splitType,
         splits: buildSplits()
-      });
-      show('Expense added');
+      };
+      if (editing) {
+        await api.updateExpense(groupId, editing.id, payload);
+        show('Expense updated');
+      } else {
+        await api.createExpense(groupId, payload);
+        show('Expense added');
+      }
       onAdded();
       onClose();
       setDescription('');
@@ -80,7 +120,7 @@ export function AddExpenseModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Add expense">
+    <Modal open={open} onClose={onClose} title={editing ? 'Edit expense' : 'Add expense'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="label">Description</label>
@@ -177,7 +217,7 @@ export function AddExpenseModal({
         )}
 
         <button type="submit" className="btn-primary w-full" disabled={loading}>
-          {loading ? 'Adding…' : 'Add expense'}
+          {loading ? 'Saving…' : editing ? 'Save changes' : 'Add expense'}
         </button>
       </form>
     </Modal>

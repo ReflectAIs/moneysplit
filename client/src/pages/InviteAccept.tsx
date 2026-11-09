@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { PasswordInput } from '../components/PasswordInput';
 
 export function InviteAccept() {
   const { token } = useParams<{ token: string }>();
@@ -14,6 +15,7 @@ export function InviteAccept() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [history, setHistory] = useState<'include' | 'new'>('new');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +30,7 @@ export function InviteAccept() {
           await login(email, password);
         }
       }
-      const group = await api.joinGroup(token!);
+      const group = await api.joinGroup(token!, history);
       show(`Joined ${group.name}`);
       navigate(`/groups/${group.id}`);
     } catch (err) {
@@ -98,16 +100,49 @@ export function InviteAccept() {
                 </div>
                 <div>
                   <label className="label">Password</label>
-                  <input
-                    type="password"
-                    className="input"
+                  <PasswordInput
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                    onChange={setPassword}
+                    placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'}
+                    minLength={mode === 'signup' ? 8 : undefined}
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   />
                 </div>
               </>
             )}
+
+            <div>
+              <label className="label">How do you want to join?</label>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setHistory('new')}
+                  className={`w-full rounded-xl border p-3 text-left transition ${history === 'new'
+                      ? 'border-olive-500 bg-olive-50 dark:bg-olive-900/30'
+                      : 'border-ink-200 dark:border-ink-700'
+                    }`}
+                >
+                  <p className="text-sm font-semibold text-ink-900 dark:text-ink-50">Start fresh (new history)</p>
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
+                    Only participate in expenses added after you join.
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHistory('include')}
+                  className={`w-full rounded-xl border p-3 text-left transition ${history === 'include'
+                      ? 'border-olive-500 bg-olive-50 dark:bg-olive-900/30'
+                      : 'border-ink-200 dark:border-ink-700'
+                    }`}
+                >
+                  <p className="text-sm font-semibold text-ink-900 dark:text-ink-50">Include in previous history</p>
+                  <p className="text-xs text-ink-500 dark:text-ink-400">
+                    Share the cost of past expenses too (equal splits only).
+                  </p>
+                </button>
+              </div>
+            </div>
+
             <button onClick={handleJoin} className="btn-primary w-full" disabled={loading}>
               {loading ? 'Joining…' : user ? 'Join group' : mode === 'signup' ? 'Create account & join' : 'Sign in & join'}
             </button>

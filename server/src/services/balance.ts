@@ -26,9 +26,11 @@ export async function getBalances(groupId: string): Promise<Balance[]> {
     net.set(s.user_id, (net.get(s.user_id) || 0) - Number(s.share_amount));
   }
   // Settlements: from_user pays to_user.
+  // A settlement REDUCES the payer's debt and REDUCES the recipient's credit.
+  // (net is positive = owed money, negative = owes money.)
   for (const st of settlements) {
-    net.set(st.from_user, (net.get(st.from_user) || 0) - Number(st.amount));
-    net.set(st.to_user, (net.get(st.to_user) || 0) + Number(st.amount));
+    net.set(st.from_user, (net.get(st.from_user) || 0) + Number(st.amount));
+    net.set(st.to_user, (net.get(st.to_user) || 0) - Number(st.amount));
   }
 
   return members.map((m) => ({

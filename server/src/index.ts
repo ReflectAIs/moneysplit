@@ -16,8 +16,9 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// Trust proxy for correct client IP behind nginx/reverse proxy
-app.set('trust proxy', 1);
+// Trust both reverse-proxy hops (host nginx -> client nginx) so each user's
+// real IP is used for rate limiting instead of a shared proxy IP.
+app.set('trust proxy', 2);
 
 // Strict CORS — only allow the configured client origin
 const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';

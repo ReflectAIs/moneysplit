@@ -34,9 +34,9 @@ RUN npm ci --omit=dev
 # Copy built artifacts
 COPY --from=build /app/shared/dist shared/dist
 COPY --from=build /app/server/dist server/dist
-# Copy migrations/seeds to dist/db where the compiled knexfile resolves them (__dirname = dist/db)
-COPY server/src/db/migrations server/dist/db/migrations
-COPY server/src/db/seeds server/dist/db/seeds
+# Copy compiled migrations/seeds (JS) so knex can run them without a TS loader
+COPY --from=build /app/server/dist/db/migrations server/dist/db/migrations
+COPY --from=build /app/server/dist/db/seeds server/dist/db/seeds
 # Compiled knexfile (JS) so migrations run without a TS loader
 COPY --from=build /app/server/dist/db/knexfile.js server/dist/db/knexfile.js
 

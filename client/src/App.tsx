@@ -7,6 +7,7 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
 import { GroupDetail } from './pages/GroupDetail';
+import { GroupDashboard } from './pages/GroupDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { InviteAccept } from './pages/InviteAccept';
 import { Profile } from './pages/Profile';
@@ -41,6 +42,7 @@ export default function App() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/groups/:id" element={<GroupDetail />} />
+        <Route path="/groups/:id/dashboard" element={<GroupDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/profile" element={<Profile />} />
       </Route>

@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import groupRoutes from './routes/groups';
 import expenseRoutes from './routes/expenses';
 import adminRoutes from './routes/admin';
+import familyRoutes from './routes/families';
 import { apiLimiter, authLimiter } from './middleware/security';
 
 dotenv.config();
@@ -41,6 +42,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 
 // Protected routes
 app.use('/api/groups', groupRoutes);
+app.use('/api/groups/:groupId/families', familyRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/admin', adminRoutes);
 

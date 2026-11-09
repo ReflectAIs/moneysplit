@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { GroupMember, Expense, Balance, Debt, GroupMemberRole } from '@moneysplit/shared';
+import type { FamilyDetail, FamilyDebt } from '@moneysplit/shared';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { Avatar } from '../components/Avatar';
 import { AddExpenseModal } from '../components/AddExpenseModal';
 import { SettleUpModal } from '../components/SettleUpModal';
+import { FamilySettleModal } from '../components/FamilySettleModal';
 import { formatMoney, formatDate } from '../lib/utils';
 
 export function GroupDetail() {
@@ -25,6 +27,10 @@ export function GroupDetail() {
   const [showEditGroup, setShowEditGroup] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [groupDesc, setGroupDesc] = useState('');
+  const [families, setFamilies] = useState<FamilyDetail[]>([]);
+  const [familyDebts, setFamilyDebts] = useState<FamilyDebt[]>([]);
+  const [showFamilySettle, setShowFamilySettle] = useState(false);
+  const [newFamilyName, setNewFamilyName] = useState('');
 
   const { user } = useAuth();
   const currentUserId = user?.id || '';
@@ -41,6 +47,12 @@ export function GroupDetail() {
       setExpenses(ex);
       setBalances(bal.balances);
       setDebts(bal.debts);
+
+      const fam = await api.listFamilies(id).catch(() => []);
+      setFamilies(fam);
+
+      const famBal = await api.getFamilyBalances(id).catch(() => ({ balances: [], debts: [] }));
+      setFamilyDebts(famBal.debts);
     } catch (err) {
       show((err as Error).message, 'error');
     } finally {
@@ -148,6 +160,52 @@ export function GroupDetail() {
     }
   };
 
+  const handleCreateFamily = async () => {
+    if (!id || !newFamilyName.trim()) return;
+    try {
+      await api.createFamily(id, newFamilyName.trim());
+      setNewFamilyName('');
+      show('Family created');
+      load();
+    } catch (err) {
+      show((err as Error).message, 'error');
+    }
+  };
+
+  const handleAssignMember = async (familyId: string, userId: string) => {
+    if (!id) return;
+    try {
+      await api.assignMemberToFamily(id, familyId, userId);
+      show('Member assigned to family');
+      load();
+    } catch (err) {
+      show((err as Error).message, 'error');
+    }
+  };
+
+  const handleRemoveFromFamily = async (familyId: string, userId: string) => {
+    if (!id) return;
+    try {
+      await api.removeMemberFromFamily(id, familyId, userId);
+      show('Member removed from family');
+      load();
+    } catch (err) {
+      show((err as Error).message, 'error');
+    }
+  };
+
+  const handleDeleteFamily = async (familyId: string) => {
+    if (!id) return;
+    if (!window.confirm('Delete this family?')) return;
+    try {
+      await api.deleteFamily(id, familyId);
+      show('Family deleted');
+      load();
+    } catch (err) {
+      show((err as Error).message, 'error');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-16">
@@ -183,7 +241,13 @@ export function GroupDetail() {
             {group.description || `${group.members.length} members`}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap">
+          <Link to={`/groups/${id}/dashboard`} className="btn-secondary" title="Dashboard">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span className="hidden sm:inline">Dashboard</span>
+          </Link>
           {isAdmin && (
             <>
               <button onClick={openEditGroup} className="btn-secondary" title="Edit group">
@@ -321,9 +385,83 @@ export function GroupDetail() {
         </div>
       </div>
 
+      {/* Families */}
+      <div className="card mb-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-white" style={{ color: '#888888' }}>
+            Families ({families.length})
+          </h2>
+          {familyDebts.length > 0 && (
+            <button onClick={() => setShowFamilySettle(true)} className="btn-secondary !px-3 !py-1.5 text-xs">
+              Settle families
+            </button>
+          )}
+        </div>
+
+        {isAdmin && (
+          <div className="mb-3 flex gap-2">
+            <input
+              className="input"
+              value={newFamilyName}
+              onChange={(e) => setNewFamilyName(e.target.value)}
+              placeholder="New family name"
+            />
+            <button onClick={handleCreateFamily} className="btn-primary shrink-0">Add</button>
+          </div>
+        )}
+
+        {families.length === 0 ? (
+          <p style={{ fontSize: '14px', color: '#888888' }}>No families yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {families.map((f) => {
+              const assignedIds = new Set(families.flatMap((x) => x.members.map((m) => m.userId)));
+              const unassigned = group.members.filter((m) => !assignedIds.has(m.userId));
+              return (
+                <div key={f.id} className="rounded-xl border border-white p-3" style={{ borderColor: '#d1d1d1' }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p style={{ fontWeight: '600', fontSize: '14px', color: '#0a0a0a' }}>{f.name}</p>
+                    {isAdmin && (
+                      <button onClick={() => handleDeleteFamily(f.id)} className="btn-danger !px-2 !py-1 text-xs">
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {f.members.map((m) => (
+                      <span key={m.userId} className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-xs" style={{ backgroundColor: '#ececd0', color: '#555500' }}>
+                        {m.name}
+                        {isAdmin && (
+                          <button onClick={() => handleRemoveFromFamily(f.id, m.userId)} title="Remove from family" style={{ color: '#808000' }}>×</button>
+                        )}
+                      </span>
+                    ))}
+                    {f.members.length === 0 && (
+                      <span style={{ fontSize: '12px', color: '#888888' }}>No members</span>
+                    )}
+                  </div>
+                  {isAdmin && unassigned.length > 0 && (
+                    <select
+                      value=""
+                      onChange={(e) => e.target.value && handleAssignMember(f.id, e.target.value)}
+                      className="input mt-2 !py-1 text-xs"
+                    >
+                      <option value="">Assign member…</option>
+                      {unassigned.map((m) => (
+                        <option key={m.userId} value={m.userId}>{m.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Expenses */}
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">Expenses</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-white" style={{ color: '#888888' }}>Expenses</h2>
       </div>
       {expenses.length === 0 ? (
         <div className="card py-10 text-center text-sm text-ink-500 dark:text-ink-400">
@@ -391,6 +529,13 @@ export function GroupDetail() {
         groupId={id!}
         debts={debts}
         currentUserId={currentUserId}
+        onSettled={load}
+      />
+      <FamilySettleModal
+        open={showFamilySettle}
+        onClose={() => setShowFamilySettle(false)}
+        groupId={id!}
+        debts={familyDebts}
         onSettled={load}
       />
 

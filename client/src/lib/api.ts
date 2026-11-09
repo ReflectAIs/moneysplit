@@ -11,7 +11,10 @@ import type {
   UpdateProfileInput,
   ChangePasswordInput,
   ForgotPasswordResponse,
-  GroupMemberRole
+  GroupMemberRole,
+  FamilyDetail,
+  FamilyBalance,
+  FamilyDebt
 } from '@moneysplit/shared';
 
 const TOKEN_KEY = 'moneysplit_token';
@@ -152,6 +155,34 @@ export const api = {
       body: JSON.stringify({ fromUser, toUser, amount, note })
     }),
   listSettlements: (groupId: string) => request<Settlement[]>(`/expenses/${groupId}/settlements`),
+
+  // Families
+  listFamilies: (groupId: string) => request<FamilyDetail[]>(`/groups/${groupId}/families`),
+  createFamily: (groupId: string, name: string) =>
+    request<FamilyDetail>(`/groups/${groupId}/families`, {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    }),
+  getFamilyBalances: (groupId: string) =>
+    request<{ balances: FamilyBalance[]; debts: FamilyDebt[] }>(`/groups/${groupId}/families/balances`),
+  settleFamilies: (groupId: string, fromFamilyId: string, toFamilyId: string, amount: number, note?: string) =>
+    request<{ message: string }>(`/groups/${groupId}/families/settle`, {
+      method: 'POST',
+      body: JSON.stringify({ fromFamilyId, toFamilyId, amount, note })
+    }),
+  assignMemberToFamily: (groupId: string, familyId: string, userId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/families/${familyId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    }),
+  removeMemberFromFamily: (groupId: string, familyId: string, userId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/families/${familyId}/members/${userId}`, {
+      method: 'DELETE'
+    }),
+  deleteFamily: (groupId: string, familyId: string) =>
+    request<{ message: string }>(`/groups/${groupId}/families/${familyId}`, {
+      method: 'DELETE'
+    }),
 
   // Admin (superadmin only)
   adminListUsers: () =>

@@ -123,3 +123,48 @@ export interface ForgotPasswordResponse {
 export interface ApiError {
   error: string;
 }
+
+// Families - named subgroups within a group.
+export interface Family {
+  id: string;
+  groupId: string;
+  name: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface FamilyMember {
+  userId: string;
+  name: string;
+}
+
+export interface FamilyDetail extends Family {
+  members: FamilyMember[];
+}
+
+export interface FamilyBalance {
+  familyId: string;
+  name: string;
+  net: number; // positive = owed to you, negative = you owe
+}
+
+export interface FamilyDebt {
+  fromFamilyId: string;
+  fromName: string;
+  toFamilyId: string;
+  toName: string;
+  amount: number;
+}
+
+export interface FamilySettlement {
+  id: string;
+  groupId: string;
+  fromFamilyId: string;
+  fromName: string;
+  toFamilyId: string;
+  toName: string;
+  amount: number;
+  note: string | null;
+  settledAt: string;
+}
+

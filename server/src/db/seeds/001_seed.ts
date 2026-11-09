@@ -2,13 +2,12 @@ import type { Knex } from 'knex';
 import bcrypt from 'bcryptjs';
 
 export async function seed(knex: Knex): Promise<void> {
-  await knex('invite_tokens').del();
-  await knex('settlements').del();
-  await knex('expense_splits').del();
-  await knex('expenses').del();
-  await knex('group_members').del();
-  await knex('groups').del();
-  await knex('users').del();
+  // Only seed demo data on an empty database. Never wipe existing rows so that
+  // re-running seeds (e.g. on every deploy) does not delete real users/groups.
+  const existing = await knex('users').count<{ count?: string | number }>('id as count').first();
+  if (existing && Number(existing.count) > 0) {
+    return;
+  }
 
   const hash = await bcrypt.hash('password123', 10);
 

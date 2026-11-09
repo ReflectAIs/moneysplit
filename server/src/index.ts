@@ -42,7 +42,7 @@ app.use('/api/auth', authLimiter, authRoutes);
 
 // Protected routes
 app.use('/api/groups', groupRoutes);
-app.use('/api/groups/:groupId/families', familyRoutes);
+app.use('/api/groups', familyRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/admin', adminRoutes);
 

@@ -43,7 +43,7 @@ async function requireMember(req: AuthRequest, res: Response, groupId: string) {
 }
 
 // List families with their members (any member).
-router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:groupId/families', async (req: AuthRequest, res: Response): Promise<void> => {
   const groupId = req.params.groupId;
   const membership = await requireMember(req, res, groupId);
   if (!membership) return;
@@ -75,7 +75,7 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
 
 // Create a family (any member).
 router.post(
-  '/',
+  '/:groupId/families',
   [body('name').trim().isLength({ min: 1, max: 80 }).withMessage('Family name is required')],
   async (req: AuthRequest, res: Response): Promise<void> => {
     const invalid = validate(req, res);
@@ -99,7 +99,7 @@ router.post(
 );
 
 // Family balances + simplified family debts (any member).
-router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:groupId/families/balances', async (req: AuthRequest, res: Response): Promise<void> => {
   const groupId = req.params.groupId;
   const membership = await requireMember(req, res, groupId);
   if (!membership) return;
@@ -111,7 +111,7 @@ router.get('/balances', async (req: AuthRequest, res: Response): Promise<void> =
 
 // Settle between two families (any member).
 router.post(
-  '/settle',
+  '/:groupId/families/settle',
   [
     body('fromFamilyId').isUUID().withMessage('Invalid from family'),
     body('toFamilyId').isUUID().withMessage('Invalid to family'),
@@ -152,7 +152,7 @@ router.post(
 
 // Assign a member to a family (admin only).
 router.post(
-  '/' + ':fid/members',
+  '/:groupId/families/' + ':fid/members',
   [
     param(':fid').isUUID().withMessage('Invalid family id'),
     body('userId').isUUID().withMessage('Invalid user id')
@@ -185,7 +185,7 @@ router.post(
 
 // Remove a member from a family (admin only).
 router.delete(
-  '/' + ':fid/members/' + ':userId',
+  '/:groupId/families/' + ':fid/members/' + ':userId',
   [
     param(':fid').isUUID().withMessage('Invalid family id'),
     param(':userId').isUUID().withMessage('Invalid user id')
@@ -212,7 +212,7 @@ router.delete(
 
 // Delete a family (admin only).
 router.delete(
-  '/' + ':fid',
+  '/:groupId/families/' + ':fid',
   [param(':fid').isUUID().withMessage('Invalid family id')],
   async (req: AuthRequest, res: Response): Promise<void> => {
     const invalid = validate(req, res);

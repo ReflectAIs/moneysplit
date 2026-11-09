@@ -154,7 +154,7 @@ router.post(
 router.post(
   '/:groupId/families/' + ':fid/members',
   [
-    param(':fid').isUUID().withMessage('Invalid family id'),
+    param('fid').isUUID().withMessage('Invalid family id'),
     body('userId').isUUID().withMessage('Invalid user id')
   ],
   async (req: AuthRequest, res: Response): Promise<void> => {
@@ -187,8 +187,8 @@ router.post(
 router.delete(
   '/:groupId/families/' + ':fid/members/' + ':userId',
   [
-    param(':fid').isUUID().withMessage('Invalid family id'),
-    param(':userId').isUUID().withMessage('Invalid user id')
+    param('fid').isUUID().withMessage('Invalid family id'),
+    param('userId').isUUID().withMessage('Invalid user id')
   ],
   async (req: AuthRequest, res: Response): Promise<void> => {
     const invalid = validate(req, res);
@@ -213,7 +213,7 @@ router.delete(
 // Delete a family (admin only).
 router.delete(
   '/:groupId/families/' + ':fid',
-  [param(':fid').isUUID().withMessage('Invalid family id')],
+  [param('fid').isUUID().withMessage('Invalid family id')],
   async (req: AuthRequest, res: Response): Promise<void> => {
     const invalid = validate(req, res);
     if (invalid) return;

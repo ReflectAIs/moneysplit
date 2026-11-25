@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Option 2: Split circle with arrow — clean and modern -->
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="#f6f6f6"/>
+
+  <!-- Large circle -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#808000" stroke-width="10"/>
+
+  <!-- Vertical split line -->
+  <line x1="256" y1="86" x2="256" y2="426" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Left half: $ sign -->
+  <text x="175" y="280" font-family="system-ui, sans-serif" font-size="150" font-weight="700" fill="#808000" text-anchor="middle">$</text>
+
+  <!-- Right half: arrow pointing right (sharing) -->
+  <line x1="290" y1="256" x2="370" y2="256" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round"/>
+  <polygon points="370,256 385,242 385,270" fill="#0a0a0a"/>
+</svg>

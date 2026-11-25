@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Option 1: Two people facing each other, sharing a coin -->
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="#f6f6f6"/>
+
+  <!-- Left person (simple abstract figure) -->
+  <circle cx="170" cy="220" r="36" fill="#808000"/>
+  <line x1="170" y1="256" x2="170" y2="340" stroke="#808000" stroke-width="8" stroke-linecap="round"/>
+  <line x1="150" y1="310" x2="190" y2="310" stroke="#808000" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Right person -->
+  <circle cx="342" cy="220" r="36" fill="#0a0a0a"/>
+  <line x1="342" y1="256" x2="342" y2="340" stroke="#0a0a0a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="322" y1="310" x2="362" y2="310" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Coin between them -->
+  <circle cx="256" cy="256" r="50" fill="none" stroke="#808000" stroke-width="6"/>
+  <text x="256" y="270" font-family="system-ui, sans-serif" font-size="52" font-weight="700" fill="#808000" text-anchor="middle">$</text>
+</svg>

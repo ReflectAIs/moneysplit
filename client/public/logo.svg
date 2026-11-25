@@ -1,25 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="oliveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#808000"/>
-      <stop offset="100%" stop-color="#6b6b00"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f6f6f6"/>
+      <stop offset="100%" stop-color="#e7e7e7"/>
     </linearGradient>
   </defs>
-  <!-- Background circle -->
-  <circle cx="256" cy="256" r="220" fill="#f6f6f6" rx="40"/>
-  <rect x="36" y="36" width="440" height="440" rx="40" fill="#f6f6f6"/>
-  <!-- Coin circle -->
-  <circle cx="256" cy="256" r="160" fill="none" stroke="#808000" stroke-width="8"/>
-  <!-- Split line (diagonal) -->
-  <line x1="256" y1="96" x2="256" y2="416" stroke="#0a0a0a" stroke-width="6"/>
-  <!-- Left half: dollar/currency sign -->
-  <text x="180" y="280" font-family="system-ui, sans-serif" font-size="160" font-weight="700" fill="#808000" text-anchor="middle">$</text>
-  <!-- Right half: arrow indicating sharing -->
-  <path d="M 320 240 L 380 240 L 380 200 L 340 200" fill="none" stroke="#0a0a0a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <polygon points="380,240 390,230 390,250" fill="#0a0a0a"/>
-  <!-- Small dots representing people -->
-  <circle cx="140" cy="140" r="12" fill="#808000"/>
-  <circle cx="372" cy="140" r="12" fill="#0a0a0a"/>
-  <circle cx="140" cy="372" r="12" fill="#0a0a0a"/>
-  <circle cx="372" cy="372" r="12" fill="#808000"/>
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="512" height="512" rx="64" fill="url(#bg)"/>
+  <!-- Outer coin ring -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#808000" stroke-width="10"/>
+  <!-- Inner circle -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#0a0a0a" stroke-width="4"/>
+  <!-- Vertical split line -->
+  <line x1="256" y1="116" x2="256" y2="396" stroke="#0a0a0a" stroke-width="5" stroke-linecap="round"/>
+  <!-- Left half: $ sign -->
+  <text x="185" y="285" font-family="Georgia, serif" font-size="170" font-weight="bold" fill="#808000" text-anchor="middle">$</text>
+  <!-- Right half: arrow pointing right (splitting/sharing) -->
+  <path d="M 310 240 L 370 240" fill="none" stroke="#0a0a0a" stroke-width="5" stroke-linecap="round"/>
+  <polygon points="370,240 380,230 380,250" fill="#0a0a0a"/>
+  <!-- Two small dots representing people on each side -->
+  <circle cx="175" cy="175" r="14" fill="#808000"/>
+  <circle cx="337" cy="175" r="14" fill="#0a0a0a"/>
+  <circle cx="175" cy="337" r="14" fill="#0a0a0a"/>
+  <circle cx="337" cy="337" r="14" fill="#808000"/>
 </svg>

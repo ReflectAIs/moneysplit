@@ -1,0 +1,22 @@
+{
+    "name": "moneysplit",
+    "short_name": "moneysplit",
+    "description": "Split expenses with friends, family and groups",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f6f6f6",
+    "theme_color": "#808000",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ]
+}

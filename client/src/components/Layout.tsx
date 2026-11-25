@@ -17,9 +17,7 @@ export function Layout() {
       <header className="sticky top-0 z-40 border-b border-ink-200 bg-white/80 backdrop-blur dark:border-ink-700 dark:bg-ink-900/80">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-olive-500 text-sm font-black text-white">
-              m$
-            </span>
+            <img src="/logo.svg" alt="moneysplit" className="h-8 w-8" />
             <span className="text-lg font-bold tracking-tight text-ink-900 dark:text-ink-50">
               moneysplit
             </span>
@@ -36,7 +34,7 @@ export function Layout() {
                 <Link to="/profile" title="Profile" className="transition hover:opacity-80">
                   <Avatar name={user.name} />
                 </Link>
-                <button onClick={handleLogout} className="btn-ghost hidden sm:inline-flex">
+                <button onClick={handleLogout} className="btn-ghost">
                   Logout
                 </button>
               </div>
